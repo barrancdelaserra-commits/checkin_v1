@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check-in Online - Barranc de la Serra</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
+    
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-8 shadow-xl">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <div class="inline-block bg-white/20 rounded-full p-4 mb-4">
+                <i class="fas fa-mountain text-5xl"></i>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-bold mb-2">
+                Barranc de la Serra
+            </h1>
+            <p class="text-xl text-indigo-100">Check-in Online - Rápido y Seguro</p>
+        </div>
+    </div>
+
+    <!-- Formulario -->
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        
+        <!-- Info importante -->
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-r-lg">
+            <div class="flex items-start">
+                <i class="fas fa-info-circle text-blue-500 text-xl mr-3 mt-1"></i>
+                <div>
+                    <p class="font-semibold text-blue-900">Por favor, completa este formulario antes de tu llegada</p>
+                    <p class="text-sm text-blue-700 mt-1">Es un requisito legal. Tus datos están protegidos.</p>
+                </div>
+            </div>
+        </div>
+
+        <form id="checkinForm" class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+            
+            <!-- Sección 1: Datos Personales -->
+            <div class="bg-gradient-to-r from-indigo-500 to-purple-500 p-6">
+                <h2 class="text-2xl font-bold text-white flex items-center">
+                    <i class="fas fa-user mr-3"></i>
+                    Datos Personales
+                </h2>
+            </div>
+            
+            <div class="p-8 space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Nombre -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">
+                            Nombre <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-3 text-gray-400">
+                                <i class="fas fa-user"></i>
+                            </span>
+                            <input type="text" 
+                                   name="nombre" 
+                                   required 
+                                   placeholder="Ej: Juan"
+                                   class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+                        </div>
+                    </div>
+                    
+                    <!-- Apellidos -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">
+                            Apellidos <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-3 text-gray-400">
+                                <i class="fas fa-user-tag"></i>
+                            </span>
+                            <input type="text" 
+                                   name="apellidos" 
+                                   required 
+                                   placeholder="Ej: García López"
+                                   class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección 2: Documento de Identidad -->
+            <div class="bg-gradient-to-r from-purple-500 to-pink-500 p-6">
+                <h2 class="text-2xl font-bold text-white flex items-center">
+                    <i class="fas fa-id-card mr-3"></i>
+                    Documento de Identidad
+                </h2>
+            </div>
+            
+            <div class="p-8 space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Tipo documento -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">
+                            Tipo de Documento <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-3 text-gray-400">
+                                <i class="fas fa-passport"></i>
+                            </span>
+                            <select name="tipo_documento" 
+                                    id="tipo_documento"
+                                    required
+                                    class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition appearance-none">
+                                <option value="">Selecciona...</option>
+                                <option value="DNI">DNI</option>
+                                <option value="NIE">NIE</option>
+                                <option value="Pasaporte">Pasaporte</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Número documento -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">
+                            Número de Documento <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-3 text-gray-400">
+                                <i class="fas fa-hashtag"></i>
+                            </span>
+                            <input type="text" 
+                                   name="numero_documento" 
+                                   required 
+                                   placeholder="Ej: 12345678A"
+                                   class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+                        </div>
+                    </div>
+
+                    <!-- Número de soporte (solo para DNI/NIE) -->
+                    <div id="soporte_container" class="hidden">
+                        <label class="block text-sm font-bold text-gray-700 mb-2">
+                            Número de Soporte <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-3 text-gray-400">
+                                <i class="fas fa-barcode"></i>
+                            </span>
+                            <input type="text" 
+                                   name="numero_soporte" 
+                                   id="numero_soporte"
+                                   placeholder="Ej: ABC123456"
+                                   pattern="[A-Z]{3}[0-9]{6}"
+                                   title="Formato: 3 letras mayúsculas + 6 números (ej: ABC123456)"
+                                   class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">
+                            <i class="fas fa-info-circle"></i> 
+                            Lo encuentras en la parte superior derecha del DNI
+                        </p>
+                    </div>
+                    
+                    <!-- Nacionalidad -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">
+                            Nacionalidad <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-3 text-gray-400">
+                                <i class="fas fa-globe"></i>
+                            </span>
+                            <input type="text" 
+                                   name="nacionalidad" 
+                                   required 
+                                   placeholder="Ej: España"
+                                   class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+                        </div>
+                    </div>
+                    
+                    <!-- Fecha nacimiento -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">
+                            Fecha de Nacimiento <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-3 text-gray-400">
+                                <i class="fas fa-calendar"></i>
+                            </span>
+                            <input type="date" 
+                                   name="fecha_nacimiento" 
+                                   required
+                                   class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+                        </div>
+                    </div>
+                    
+                    <!-- Sexo -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-bold text-gray-700 mb-2">
+                            Sexo <span class="text-red-500">*</span>
+                        </label>
+                        <div class="flex gap-4">
+                            <label class="flex items-center bg-gray-50 px-6 py-3 rounded-lg border-2 border-gray-300 cursor-pointer hover:bg-indigo-50 hover:border-indigo-500 transition">
+                                <input type="radio" name="sexo" value="M" required class="mr-2">
+                                <i class="fas fa-mars text-blue-500 mr-2"></i>
+                                Masculino
+                            </label>
+                            <label class="flex items-center bg-gray-50 px-6 py-3 rounded-lg border-2 border-gray-300 cursor-pointer hover:bg-pink-50 hover:border-pink-500 transition">
+                                <input type="radio" name="sexo" value="F" required class="mr-2">
+                                <i class="fas fa-venus text-pink-500 mr-2"></i>
+                                Femenino
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección 3: Contacto y Dirección -->
+            <div class="bg-gradient-to-r from-pink-500 to-red-500 p-6">
+                <h2 class="text-2xl font-bold text-white flex items-center">
+                    <i class="fas fa-address-book mr-3"></i>
+                    Datos de Contacto y Dirección
+                </h2>
+            </div>
+            
+            <div class="p-8 space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Teléfono -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">
+                            Teléfono <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-3 text-gray-400">
+                                <i class="fas fa-phone"></i>
+                            </span>
+                            <input type="tel" 
+                                   name="telefono" 
+                                   required 
+                                   placeholder="Ej: +34 600 123 456"
+                                   pattern="[+]?[0-9\s]+"
+                                   title="Solo números y espacios"
+                                   class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Incluye el código de país (ej: +34 para España)</p>
+                    </div>
+                    
+                    <!-- Email -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">
+                            Email <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-3 text-gray-400">
+                                <i class="fas fa-envelope"></i>
+                            </span>
+                            <input type="email" 
+                                   name="email" 
+                                   required 
+                                   placeholder="Ej: tu@email.com"
+                                   class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+                        </div>
+                    </div>
+
+                    <!-- Código Postal -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">
+                            Código Postal <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-3 text-gray-400">
+                                <i class="fas fa-map-pin"></i>
+                            </span>
+                            <input type="text" 
+                                   name="codigo_postal" 
+                                   required 
+                                   placeholder="Ej: 08001"
+                                   pattern="[0-9]{4,5}"
+                                   title="Código postal de 4 o 5 dígitos"
+                                   class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+                        </div>
+                    </div>
+
+                    <!-- Ciudad -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">
+                            Ciudad <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-3 text-gray-400">
+                                <i class="fas fa-city"></i>
+                            </span>
+                            <input type="text" 
+                                   name="ciudad" 
+                                   required 
+                                   placeholder="Ej: Barcelona"
+                                   class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección 4: Fechas -->
+            <div class="bg-gradient-to-r from-red-500 to-orange-500 p-6">
+                <h2 class="text-2xl font-bold text-white flex items-center">
+                    <i class="fas fa-calendar-check mr-3"></i>
+                    Fechas de Estancia
+                </h2>
+            </div>
+            
+            <div class="p-8 space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Fecha entrada -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">
+                            Fecha de Entrada <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-3 text-gray-400">
+                                <i class="fas fa-calendar-plus"></i>
+                            </span>
+                            <input type="date" 
+                                   name="fecha_entrada" 
+                                   required
+                                   class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+                        </div>
+                    </div>
+                    
+                    <!-- Fecha salida -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">
+                            Fecha de Salida <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-3 text-gray-400">
+                                <i class="fas fa-calendar-minus"></i>
+                            </span>
+                            <input type="date" 
+                                   name="fecha_salida" 
+                                   required
+                                   class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NUEVO: Política de Privacidad -->
+            <div class="bg-gray-50 px-8 pt-6 pb-4">
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+                    <label class="flex items-start cursor-pointer">
+                        <input type="checkbox" 
+                               name="acepta_privacidad" 
+                               id="acepta_privacidad"
+                               required 
+                               class="mt-1 mr-3 w-5 h-5 cursor-pointer flex-shrink-0">
+                        <span class="text-sm text-gray-700">
+                            <i class="fas fa-shield-alt text-blue-600 mr-1"></i>
+                            He leído y acepto la 
+                            <a href="#" onclick="mostrarPrivacidad(); return false;" class="text-indigo-600 underline font-semibold hover:text-indigo-800">
+                                Política de Privacidad y Protección de Datos
+                            </a>. 
+                            Entiendo que mis datos serán tratados conforme al RGPD y comunicados al Ministerio del Interior según obliga la ley.
+                            <span class="text-red-500 font-bold">*</span>
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Botón enviar -->
+            <div class="bg-gray-50 px-8 pb-8">
+                <button type="submit" 
+                        id="submitBtn"
+                        class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-4 px-8 rounded-xl font-bold text-lg hover:from-indigo-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-xl flex items-center justify-center gap-3">
+                    <i class="fas fa-check-circle text-2xl"></i>
+                    <span>Completar Check-in</span>
+                </button>
+                
+                <!-- Mensaje de estado -->
+                <div id="mensaje" class="hidden mt-6 p-4 rounded-lg text-center font-semibold"></div>
+            </div>
+
+        </form>
+
+        <!-- Footer -->
+        <div class="mt-8 text-center text-gray-600">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <i class="fas fa-lock text-3xl text-green-500 mb-3"></i>
+                <p class="font-semibold">🔒 Tus datos están protegidos</p>
+                <p class="text-sm mt-2">Solo se usan para cumplir con la normativa legal de hospedajes</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('checkinForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const mensaje = document.getElementById('mensaje');
+        const tipoDocumento = document.getElementById('tipo_documento');
+        const soporteContainer = document.getElementById('soporte_container');
+        const numeroSoporte = document.getElementById('numero_soporte');
+        
+        // URL del Google Apps Script
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz-XTscqTWse4cyKAX0bRt7e7rASXmu9FwPRyIHzaoo0o8tZtBC67sNjem5FSXkp4MUjQ/exec';
+        
+        // Mostrar/ocultar campo de número de soporte según tipo de documento
+        tipoDocumento.addEventListener('change', (e) => {
+            if (e.target.value === 'DNI' || e.target.value === 'NIE') {
+                soporteContainer.classList.remove('hidden');
+                numeroSoporte.required = true;
+            } else {
+                soporteContainer.classList.add('hidden');
+                numeroSoporte.required = false;
+                numeroSoporte.value = '';
+            }
+        });
+        
+        // Convertir número de soporte a mayúsculas automáticamente
+        numeroSoporte.addEventListener('input', (e) => {
+            e.target.value = e.target.value.toUpperCase();
+        });
+        
+        // Función para mostrar política de privacidad
+        function mostrarPrivacidad() {
+            const ventana = window.open('', 'Política de Privacidad', 'width=700,height=800,scrollbars=yes');
+            ventana.document.write(`
+                <!DOCTYPE html>
+                <html lang="es">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Política de Privacidad - Barranc de la Serra</title>
+                    <style>
+                        body { 
+                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; 
+                            padding: 30px; 
+                            line-height: 1.6;
+                            color: #333;
+                            max-width: 800px;
+                            margin: 0 auto;
+                            background: #f9fafb;
+                        }
+                        .container {
+                            background: white;
+                            padding: 30px;
+                            border-radius: 10px;
+                            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                        }
+                        h1 { 
+                            color: #4F46E5; 
+                            border-bottom: 3px solid #4F46E5;
+                            padding-bottom: 10px;
+                            margin-bottom: 20px;
+                        }
+                        h2 { 
+                            color: #6366F1; 
+                            margin-top: 25px;
+                            margin-bottom: 15px;
+                        }
+                        ul { 
+                            margin-left: 20px; 
+                            margin-bottom: 15px;
+                        }
+                        li {
+                            margin-bottom: 8px;
+                        }
+                        .info-box {
+                            background: #EEF2FF;
+                            border-left: 4px solid #4F46E5;
+                            padding: 15px;
+                            margin: 15px 0;
+                            border-radius: 5px;
+                        }
+                        .button {
+                            background: #4F46E5;
+                            color: white;
+                            padding: 12px 30px;
+                            border: none;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            font-size: 16px;
+                            font-weight: bold;
+                            display: block;
+                            margin: 30px auto 0;
+                            transition: background 0.3s;
+                        }
+                        .button:hover {
+                            background: #4338CA;
+                        }
+                        strong {
+                            color: #4F46E5;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <h1>📜 POLÍTICA DE PRIVACIDAD Y PROTECCIÓN DE DATOS</h1>
+                        
+                        <h2>1. RESPONSABLE DEL TRATAMIENTO</h2>
+                        <div class="info-box">
+                            <p><strong>Titular:</strong> Albergue Barranc de la Serra</p>
+                            <p><strong>Dirección:</strong> Carretera Calaceite - Monroyo, nº 3</p>
+                            <p><strong>Email:</strong> info@barrancdelaserra.com</p>
+                            <p><strong>Teléfono:</strong> 686 641 920</p>
+                        </div>
+                        
+                        <h2>2. FINALIDAD DEL TRATAMIENTO</h2>
+                        <p>Los datos personales que nos facilitas a través del formulario de check-in online se utilizan exclusivamente para:</p>
+                        <ul>
+                            <li>✅ <strong>Cumplir con la obligación legal</strong> del Parte de Viajeros (Real Decreto 933/2021, artículo 3), que exige comunicar los datos de los huéspedes al Ministerio del Interior.</li>
+                            <li>✅ <strong>Gestión de tu reserva</strong> y estancia en nuestro albergue.</li>
+                            <li>✅ <strong>Comunicaciones relacionadas</strong> con tu reserva (confirmaciones, información útil).</li>
+                        </ul>
+                        
+                        <h2>3. LEGITIMACIÓN</h2>
+                        <p>El tratamiento de tus datos se basa en:</p>
+                        <ul>
+                            <li><strong>Obligación legal:</strong> Comunicación de datos a las Fuerzas y Cuerpos de Seguridad del Estado (Parte de Viajeros).</li>
+                            <li><strong>Ejecución del contrato:</strong> Gestión de tu reserva y estancia.</li>
+                        </ul>
+                        
+                        <h2>4. DATOS RECOGIDOS</h2>
+                        <p>Recogemos los siguientes datos personales:</p>
+                        <ul>
+                            <li>Nombre y apellidos</li>
+                            <li>Tipo y número de documento de identidad</li>
+                            <li>Número de soporte del documento (solo DNI/NIE español)</li>
+                            <li>Nacionalidad</li>
+                            <li>Fecha de nacimiento</li>
+                            <li>Sexo</li>
+                            <li>Teléfono de contacto</li>
+                            <li>Correo electrónico</li>
+                            <li>Código postal y ciudad de residencia</li>
+                            <li>Fechas de entrada y salida</li>
+                        </ul>
+                        
+                        <h2>5. DESTINATARIOS DE LOS DATOS</h2>
+                        <p>Tus datos pueden ser comunicados a:</p>
+                        <ul>
+                            <li><strong>Ministerio del Interior (Fuerzas y Cuerpos de Seguridad del Estado):</strong> Obligación legal del Parte de Viajeros.</li>
+                            <li><strong>Proveedores tecnológicos:</strong> Google LLC (almacenamiento en Google Sheets). Google cumple con el RGPD mediante cláusulas contractuales tipo aprobadas por la UE.</li>
+                        </ul>
+                        <div class="info-box">
+                            <strong>⚠️ Importante:</strong> No vendemos ni cedemos tus datos a terceros con fines comerciales.
+                        </div>
+                        
+                        <h2>6. CONSERVACIÓN DE LOS DATOS</h2>
+                        <p>Conservaremos tus datos durante:</p>
+                        <ul>
+                            <li><strong>Mínimo 3 años</strong> desde la fecha de salida (obligación legal del Parte de Viajeros).</li>
+                            <li>Posteriormente, podrán conservarse bloqueados para atender posibles responsabilidades legales.</li>
+                        </ul>
+                        
+                        <h2>7. SEGURIDAD</h2>
+                        <p>Aplicamos medidas técnicas y organizativas para proteger tus datos:</p>
+                        <ul>
+                            <li>✅ Cifrado HTTPS/TLS en la transmisión de datos</li>
+                            <li>✅ Almacenamiento en servidores seguros de Google</li>
+                            <li>✅ Acceso restringido solo a personal autorizado</li>
+                            <li>✅ Copias de seguridad automáticas</li>
+                        </ul>
+                        
+                        <h2>8. TUS DERECHOS</h2>
+                        <p>Puedes ejercer los siguientes derechos en cualquier momento:</p>
+                        <ul>
+                            <li><strong>Acceso:</strong> Conocer qué datos tenemos sobre ti</li>
+                            <li><strong>Rectificación:</strong> Corregir datos incorrectos</li>
+                            <li><strong>Supresión:</strong> Solicitar el borrado (salvo obligación legal)</li>
+                            <li><strong>Limitación:</strong> Restringir el tratamiento</li>
+                            <li><strong>Portabilidad:</strong> Recibir tus datos en formato digital</li>
+                            <li><strong>Oposición:</strong> Oponerte al tratamiento</li>
+                        </ul>
+                        
+                        <div class="info-box">
+                            <p><strong>📧 Cómo ejercerlos:</strong></p>
+                            <p>• Email: info@barrancdelaserra.com<br>
+                            • Teléfono: 686 641 920<br>
+                            • Adjuntando copia de tu DNI/Pasaporte</p>
+                        </div>
+                        
+                        <p><strong>Reclamaciones:</strong><br>
+                        Puedes presentar una reclamación ante la <strong>Agencia Española de Protección de Datos (AEPD)</strong>:</p>
+                        <ul>
+                            <li>Web: <a href="https://www.aepd.es" target="_blank">www.aepd.es</a></li>
+                            <li>Dirección: C/ Jorge Juan, 6, 28001 Madrid</li>
+                        </ul>
+                        
+                        <h2>9. CONSENTIMIENTO</h2>
+                        <p>Al enviar el formulario de check-in, confirmas haber leído y aceptado esta Política de Privacidad.</p>
+                        
+                        <hr style="margin: 30px 0; border: none; border-top: 2px solid #E5E7EB;">
+                        
+                        <p style="text-align: center; color: #6B7280; font-size: 14px;">
+                            <strong>Fecha última actualización:</strong> Febrero 2026<br>
+                            Barranc de la Serra - Carretera Calaceite - Monroyo, nº 3
+                        </p>
+                        
+                        <button onclick="window.close()" class="button">
+                            ✓ Cerrar ventana
+                        </button>
+                    </div>
+                </body>
+                </html>
+            `);
+        }
+        
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Deshabilitar botón
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin text-2xl"></i> <span>Enviando...</span>';
+            
+            // Recoger datos del formulario
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+            
+            // Si no hay número de soporte, poner vacío
+            if (!data.numero_soporte) {
+                data.numero_soporte = '';
+            }
+            
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    // Éxito
+                    mensaje.className = 'mt-6 p-6 rounded-lg text-center font-semibold bg-green-100 border-2 border-green-500 text-green-800';
+                    mensaje.innerHTML = '<i class="fas fa-check-circle text-3xl mb-2"></i><br>¡Check-in completado con éxito!<br><span class="text-sm">Nos vemos pronto en Barranc de la Serra 😊</span>';
+                    mensaje.classList.remove('hidden');
+                    form.reset();
+                    soporteContainer.classList.add('hidden');
+                    
+                    // Scroll al mensaje
+                    mensaje.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                } else {
+                    throw new Error(result.mensaje);
+                }
+                
+            } catch (error) {
+                // Error
+                mensaje.className = 'mt-6 p-6 rounded-lg text-center font-semibold bg-red-100 border-2 border-red-500 text-red-800';
+                mensaje.innerHTML = '<i class="fas fa-exclamation-triangle text-3xl mb-2"></i><br>Error al enviar<br><span class="text-sm">Por favor, inténtalo de nuevo</span>';
+                mensaje.classList.remove('hidden');
+            } finally {
+                // Rehabilitar botón
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-check-circle text-2xl"></i> <span>Completar Check-in</span>';
+            }
+        });
+        
+        // Validación de fechas (salida > entrada)
+        const fechaEntrada = document.querySelector('input[name="fecha_entrada"]');
+        const fechaSalida = document.querySelector('input[name="fecha_salida"]');
+        
+        fechaEntrada.addEventListener('change', () => {
+            fechaSalida.min = fechaEntrada.value;
+        });
+    </script>
+
+</body>
+</html>
