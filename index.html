@@ -6,696 +6,936 @@
     <title>Check-in Online - Barranc de la Serra</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .persona-completada { border: 3px solid #10B981 !important; background: #ECFDF5 !important; }
+        .badge-completado { position: absolute; top: 20px; right: 20px; background: #10B981; color: white; padding: 8px 16px; border-radius: 20px; font-weight: bold; display: none; z-index: 10; }
+        .badge-completado.visible { display: block; }
+        .btn-guardar-persona { background: linear-gradient(to right, #10B981, #059669); }
+        .btn-guardar-persona:hover { background: linear-gradient(to right, #059669, #047857); }
+        .progress-bar { background: #E5E7EB; height: 8px; border-radius: 10px; overflow: hidden; margin: 20px 0; }
+        .progress-fill { background: linear-gradient(to right, #10B981, #059669); height: 100%; transition: width 0.5s ease; }
+        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+        .share-box { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .toast { position: fixed; bottom: 20px; right: 20px; padding: 12px 24px; border-radius: 12px; font-weight: bold; font-size: 14px; z-index: 1000; opacity: 0; transform: translateY(20px); transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .toast.visible { opacity: 1; transform: translateY(0); }
+        .toast.success { background: #10B981; color: white; }
+        .toast.error { background: #EF4444; color: white; }
+        .toast.info { background: #3B82F6; color: white; }
+    </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
     
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Loading -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="text-center">
+            <i class="fas fa-spinner fa-spin text-indigo-600 text-5xl mb-4"></i>
+            <p class="text-gray-600 font-semibold" id="loadingText">Cargando...</p>
+        </div>
+    </div>
+
     <!-- Header -->
     <div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-8 shadow-xl">
         <div class="max-w-4xl mx-auto px-4 text-center">
             <div class="inline-block bg-white/20 rounded-full p-4 mb-4">
                 <i class="fas fa-mountain text-5xl"></i>
             </div>
-            <h1 class="text-4xl md:text-5xl font-bold mb-2">
-                Barranc de la Serra
-            </h1>
+            <h1 class="text-4xl md:text-5xl font-bold mb-2">Barranc de la Serra</h1>
             <p class="text-xl text-indigo-100">Check-in Online - Rápido y Seguro</p>
         </div>
     </div>
 
-    <!-- Formulario -->
     <div class="max-w-4xl mx-auto px-4 py-8">
-        
-        <!-- Info importante -->
-        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-r-lg">
-            <div class="flex items-start">
-                <i class="fas fa-info-circle text-blue-500 text-xl mr-3 mt-1"></i>
-                <div>
-                    <p class="font-semibold text-blue-900">Por favor, completa este formulario antes de tu llegada</p>
-                    <p class="text-sm text-blue-700 mt-1">Es un requisito legal. Tus datos están protegidos.</p>
+
+        <!-- ========================================= -->
+        <!-- VISTA 1: CREAR RESERVA                    -->
+        <!-- ========================================= -->
+        <div id="vistaCrearReserva">
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-r-lg">
+                <div class="flex items-start">
+                    <i class="fas fa-info-circle text-blue-500 text-xl mr-3 mt-1"></i>
+                    <div>
+                        <p class="font-semibold text-blue-900">Paso 1: Crea tu reserva</p>
+                        <p class="text-sm text-blue-700 mt-1">Después podrás compartir el enlace para que cada persona rellene sus datos desde su propio dispositivo.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+                <div class="bg-gradient-to-r from-green-500 to-teal-500 p-6">
+                    <h2 class="text-2xl font-bold text-white flex items-center">
+                        <i class="fas fa-clipboard-list mr-3"></i>
+                        Información de la Reserva
+                    </h2>
+                </div>
+                
+                <div class="p-8 space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">
+                                Número de Personas <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-3 text-gray-400"><i class="fas fa-users"></i></span>
+                                <select id="crear_numero_personas" required
+                                        class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+                                    <option value="">Selecciona...</option>
+                                    <option value="1">1 persona</option>
+                                    <option value="2">2 personas</option>
+                                    <option value="3">3 personas</option>
+                                    <option value="4">4 personas</option>
+                                    <option value="5">5 personas</option>
+                                    <option value="6">6 personas</option>
+                                    <option value="7">7 personas</option>
+                                    <option value="8">8 personas</option>
+                                    <option value="9">9 personas</option>
+                                    <option value="10">10 personas</option>
+                                    <option value="11">11 personas</option>
+                                    <option value="12">12 personas</option>
+                                    <option value="13">13 personas</option>
+                                    <option value="14">14 personas</option>
+                                    <option value="15">15 personas</option>
+                                    <option value="16">16 personas</option>
+                                    <option value="17">17 personas</option>
+                                    <option value="18">18 personas</option>
+                                    <option value="19">19 personas</option>
+                                    <option value="20">20 personas</option>
+                                    <option value="21">21 personas</option>
+                                    <option value="22">22 personas</option>
+                                    <option value="23">23 personas</option>
+                                    <option value="24">24 personas</option>
+                                    <option value="25">25 personas</option>
+                                    <option value="26">26 personas</option>
+                                    <option value="27">27 personas</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">
+                                Método de pago <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-3 text-gray-400"><i class="fas fa-credit-card"></i></span>
+                                <select id="crear_origen_reserva" required
+                                        class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+                                    <option value="">Selecciona...</option>
+                                    <option value="Booking">Booking.com</option>
+                                    <option value="Airbnb">Airbnb</option>
+				    <option value="Transferencia">Transferencia</option>
+                                    <option value="Directo">Efectivo/Tarjeta</option>
+                                    <option value="Web">Web del albergue</option>
+                                    <option value="Otro">Otro</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">
+                                Fecha de Entrada <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-3 text-gray-400"><i class="fas fa-calendar-plus"></i></span>
+                                <input type="date" id="crear_fecha_entrada" required
+                                       class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">
+                                Fecha de Salida <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-3 text-gray-400"><i class="fas fa-calendar-minus"></i></span>
+                                <input type="date" id="crear_fecha_salida" required
+                                       class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="crearReserva()" 
+                            class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-4 px-8 rounded-xl font-bold text-lg hover:from-indigo-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-xl flex items-center justify-center gap-3">
+                        <i class="fas fa-plus-circle text-2xl"></i>
+                        <span>Crear Reserva y Obtener Enlace</span>
+                    </button>
                 </div>
             </div>
         </div>
 
-        <form id="checkinForm" class="bg-white rounded-2xl shadow-2xl overflow-hidden">
-            
-            <!-- Sección 0: Información de Reserva -->
-            <div class="bg-gradient-to-r from-green-500 to-teal-500 p-6">
-                <h2 class="text-2xl font-bold text-white flex items-center">
-                    <i class="fas fa-clipboard-list mr-3"></i>
-                    Información de la Reserva
-                </h2>
-            </div>
-            
-            <div class="p-8 space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Número de personas -->
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">
-                            Número de Personas <span class="text-red-500">*</span>
-                        </label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-3 text-gray-400">
-                                <i class="fas fa-users"></i>
-                            </span>
-                            <select name="numero_personas" 
-                                    id="numero_personas"
-                                    required
-                                    class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
-                                <option value="">Selecciona...</option>
-                                <option value="1">1 persona</option>
-                                <option value="2">2 personas</option>
-                                <option value="3">3 personas</option>
-                                <option value="4">4 personas</option>
-                                <option value="5">5 personas</option>
-                                <option value="6">6 personas</option>
-                                <option value="7">7 personas</option>
-                                <option value="8">8 personas</option>
-                                <option value="9">9 personas</option>
-                                <option value="10">10 personas</option>
-                                <option value="11">11 personas</option>
-                                <option value="12">12 personas</option>
-                                <option value="13">13 personas</option>
-                                <option value="14">14 personas</option>
-                                <option value="15">15 personas</option>
-                                <option value="16">16 personas</option>
-                                <option value="17">17 personas</option>
-                                <option value="18">18 personas</option>
-                                <option value="19">19 personas</option>
-                                <option value="20">20 personas</option>
-                                <option value="21">21 personas</option>
-                                <option value="22">22 personas</option>
-                                <option value="23">23 personas</option>
-                                <option value="24">24 personas</option>
-                                <option value="25">25 personas</option>
-                                <option value="26">26 personas</option>
-                                <option value="27">27 personas</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Origen de la reserva -->
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">
-                            Metodo de pago: <span class="text-red-500">*</span>
-                        </label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-3 text-gray-400">
-                                <i class="fas fa-globe"></i>
-                            </span>
-                            <select name="origen_reserva" 
-                                    required
-                                    class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
-                                <option value="">Selecciona...</option>
-                                <option value="Booking">Booking.com</option>
-                                <option value="Airbnb">Airbnb</option>
-                                <option value="Directo">Trasferencia/Tarjeta (teléfono/email)</option>
-                                <option value="Web">Web del albergue</option>
-                                <option value="Otro">Otro</option>
-                            </select>
-                        </div>
-                    </div>
+        <!-- ========================================= -->
+        <!-- VISTA 2: COMPARTIR ENLACE                 -->
+        <!-- ========================================= -->
+        <div id="vistaCompartir" class="hidden">
+            <div class="share-box rounded-2xl shadow-2xl p-8 text-white text-center mb-8">
+                <i class="fas fa-check-circle text-6xl mb-4"></i>
+                <h2 class="text-3xl font-bold mb-2">¡Reserva creada!</h2>
+                <p class="text-xl mb-6">Código: <span id="codigoReservaDisplay" class="bg-white/20 px-4 py-2 rounded-lg font-mono text-2xl"></span></p>
+                
+                <p class="mb-4">Comparte este enlace con todos los huéspedes:</p>
+                
+                <div class="bg-white/10 rounded-xl p-4 flex items-center gap-3 mb-6">
+                    <input type="text" id="enlaceCompartir" readonly
+                           class="flex-1 bg-transparent text-white text-center font-mono text-sm outline-none">
+                    <button onclick="copiarEnlace()" 
+                            class="bg-white text-purple-600 px-6 py-3 rounded-lg font-bold hover:bg-gray-100 transition flex-shrink-0">
+                        <i class="fas fa-copy mr-2"></i>Copiar
+                    </button>
                 </div>
 
-                <!-- Fechas de estancia -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="flex flex-wrap justify-center gap-3">
+                    <button onclick="compartirWhatsApp()" class="bg-green-500 hover:bg-green-600 px-6 py-3 rounded-lg font-bold transition">
+                        <i class="fab fa-whatsapp mr-2"></i>WhatsApp
+                    </button>
+                    <button onclick="compartirEmail()" class="bg-blue-500 hover:bg-blue-600 px-6 py-3 rounded-lg font-bold transition">
+                        <i class="fas fa-envelope mr-2"></i>Email
+                    </button>
+                    <button onclick="compartirTelegram()" class="bg-sky-500 hover:bg-sky-600 px-6 py-3 rounded-lg font-bold transition">
+                        <i class="fab fa-telegram mr-2"></i>Telegram
+                    </button>
+                </div>
+            </div>
+
+            <button onclick="irARellenar()" 
+                    class="w-full bg-gradient-to-r from-green-500 to-teal-500 text-white py-4 px-8 rounded-xl font-bold text-lg hover:from-green-600 hover:to-teal-600 transform hover:scale-105 transition-all duration-200 shadow-xl flex items-center justify-center gap-3">
+                <i class="fas fa-edit text-2xl"></i>
+                <span>Rellenar mis datos ahora</span>
+            </button>
+        </div>
+
+        <!-- ========================================= -->
+        <!-- VISTA 3: RELLENAR DATOS                   -->
+        <!-- ========================================= -->
+        <div id="vistaRellenar" class="hidden">
+            
+            <!-- Info de la reserva -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                <div class="flex flex-wrap items-center justify-between gap-4">
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">
-                            Fecha de Entrada <span class="text-red-500">*</span>
-                        </label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-3 text-gray-400">
-                                <i class="fas fa-calendar-plus"></i>
-                            </span>
-                            <input type="date" 
-                                   name="fecha_entrada" 
-                                   id="fecha_entrada"
-                                   required
-                                   class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
-                        </div>
+                        <p class="text-sm text-gray-500">Reserva</p>
+                        <p class="text-2xl font-bold text-indigo-600 font-mono" id="infoCodigoReserva"></p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Entrada</p>
+                        <p class="font-bold" id="infoFechaEntrada"></p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Salida</p>
+                        <p class="font-bold" id="infoFechaSalida"></p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Personas</p>
+                        <p class="font-bold" id="infoNumPersonas"></p>
+                    </div>
+                    <button onclick="refrescarEstado()" class="bg-indigo-100 text-indigo-600 px-4 py-2 rounded-lg font-bold hover:bg-indigo-200 transition">
+                        <i class="fas fa-sync-alt mr-1"></i> Actualizar
+                    </button>
+                </div>
+                
+                <div class="mt-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <p class="text-sm font-bold text-gray-700"><i class="fas fa-tasks mr-2"></i>Progreso</p>
+                        <p class="text-sm font-bold text-indigo-600" id="progressText">0 de 0</p>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Selector de persona -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                <h3 class="font-bold text-gray-700 mb-4 text-lg">
+                    <i class="fas fa-user-check mr-2 text-indigo-500"></i>
+                    ¿Qué persona eres?
+                </h3>
+                <div id="selectorPersonas" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
+            </div>
+
+            <!-- Formulario persona -->
+            <div id="formularioPersona" class="hidden">
+                <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+                    <div id="headerPersona" class="bg-gradient-to-r from-indigo-500 to-purple-500 p-6">
+                        <h2 class="text-2xl font-bold text-white flex items-center">
+                            <i class="fas fa-user mr-3"></i>
+                            <span id="tituloPersona">Persona 1</span>
+                        </h2>
                     </div>
                     
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">
-                            Fecha de Salida <span class="text-red-500">*</span>
-                        </label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-3 text-gray-400">
-                                <i class="fas fa-calendar-minus"></i>
-                            </span>
-                            <input type="date" 
-                                   name="fecha_salida" 
-                                   id="fecha_salida"
-                                   required
-                                   class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+                    <div class="p-8 space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Nombre <span class="text-red-500">*</span></label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-3 text-gray-400"><i class="fas fa-user"></i></span>
+                                    <input type="text" id="p_nombre" placeholder="Ej: Juan" class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Primer Apellido <span class="text-red-500">*</span></label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-3 text-gray-400"><i class="fas fa-user-tag"></i></span>
+                                    <input type="text" id="p_apellido1" placeholder="Ej: García" class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Segundo Apellido <span class="text-red-500">*</span></label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-3 text-gray-400"><i class="fas fa-user-tag"></i></span>
+                                    <input type="text" id="p_apellido2" placeholder="Ej: López" class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Viajo con <span class="text-red-500">*</span></label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-3 text-gray-400"><i class="fas fa-people-arrows"></i></span>
+                                    <select id="p_parentesco" class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition appearance-none">
+                                        <option value="">Selecciona...</option>
+                                        <option value="Cónyuge">Mi cónyuge</option>
+                                        <option value="Pareja">Mi pareja</option>
+                                        <option value="Hijo/a">Mi hijo/a</option>
+                                        <option value="Padre/Madre">Mi padre/madre</option>
+                                        <option value="Hermano/a">Mi hermano/a</option>
+                                        <option value="Familia">Familia</option>
+                                        <option value="Amigos">Amigos</option>
+                                        <option value="Solo/a">Viajo solo/a</option>
+                                        <option value="Otro">Otro</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Tipo de Documento <span class="text-red-500">*</span></label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-3 text-gray-400"><i class="fas fa-passport"></i></span>
+                                    <select id="p_tipo_documento" class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition appearance-none">
+                                        <option value="">Selecciona...</option>
+                                        <option value="DNI">DNI</option>
+                                        <option value="NIE">NIE</option>
+                                        <option value="Pasaporte">Pasaporte</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Nº Documento <span class="text-red-500">*</span></label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-3 text-gray-400"><i class="fas fa-hashtag"></i></span>
+                                    <input type="text" id="p_numero_documento" placeholder="Ej: 12345678A" class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+                                </div>
+                            </div>
+                            <div id="soporteContainer" class="hidden md:col-span-2">
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Nº Soporte <span class="text-red-500">*</span></label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-3 text-gray-400"><i class="fas fa-barcode"></i></span>
+                                    <input type="text" id="p_numero_soporte" placeholder="Ej: ABC123456" class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1"><i class="fas fa-info-circle"></i> Parte superior derecha del DNI</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Nacionalidad <span class="text-red-500">*</span></label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-3 text-gray-400"><i class="fas fa-globe"></i></span>
+                                    <input type="text" id="p_nacionalidad" placeholder="Ej: España" class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Fecha Nacimiento <span class="text-red-500">*</span></label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-3 text-gray-400"><i class="fas fa-calendar"></i></span>
+                                    <input type="date" id="p_fecha_nacimiento" class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Sexo <span class="text-red-500">*</span></label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-3 text-gray-400"><i class="fas fa-venus-mars"></i></span>
+                                    <select id="p_sexo" class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition appearance-none">
+                                        <option value="">Selecciona...</option>
+                                        <option value="M">Masculino</option>
+                                        <option value="F">Femenino</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Teléfono <span class="text-red-500">*</span></label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-3 text-gray-400"><i class="fas fa-phone"></i></span>
+                                    <input type="tel" id="p_telefono" placeholder="Ej: +34 600 123 456" class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Email <span class="text-red-500">*</span></label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-3 text-gray-400"><i class="fas fa-envelope"></i></span>
+                                    <input type="email" id="p_email" placeholder="Ej: tu@email.com" class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h3 class="font-bold text-gray-700 mb-4"><i class="fas fa-map-marked-alt mr-2"></i>Dirección</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">Calle/Avenida <span class="text-red-500">*</span></label>
+                                    <input type="text" id="p_calle" placeholder="Ej: Calle Mayor" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">Nº/Puerta <span class="text-red-500">*</span></label>
+                                    <input type="text" id="p_numero_puerta" placeholder="Ej: 24" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">Piso (opcional)</label>
+                                    <input type="text" id="p_piso" placeholder="Ej: 2º" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">C.P. <span class="text-red-500">*</span></label>
+                                    <input type="text" id="p_codigo_postal" placeholder="Ej: 08001" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">Ciudad <span class="text-red-500">*</span></label>
+                                    <input type="text" id="p_ciudad" placeholder="Ej: Barcelona" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">Provincia <span class="text-red-500">*</span></label>
+                                    <input type="text" id="p_provincia" placeholder="Ej: Barcelona" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">País <span class="text-red-500">*</span></label>
+                                    <input type="text" id="p_pais" placeholder="Ej: España" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Privacidad -->
+                        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+                            <label class="flex items-start cursor-pointer">
+                                <input type="checkbox" id="p_privacidad" class="mt-1 mr-3 w-5 h-5 cursor-pointer flex-shrink-0">
+                                <span class="text-sm text-gray-700">
+                                    <i class="fas fa-shield-alt text-blue-600 mr-1"></i>
+                                    He leído y acepto la 
+                                    <a href="#" onclick="mostrarPrivacidad(); return false;" class="text-indigo-600 underline font-semibold">Política de Privacidad</a>.
+                                    <span class="text-red-500 font-bold">*</span>
+                                </span>
+                            </label>
+                        </div>
+
+                        <button type="button" onclick="guardarPersonaOnline()" id="btnGuardarPersona"
+                                class="w-full btn-guardar-persona text-white py-4 px-6 rounded-xl font-bold text-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center gap-3">
+                            <i class="fas fa-cloud-upload-alt text-2xl"></i>
+                            <span>Guardar mis datos en la nube</span>
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Contenedor dinámico para personas -->
-            <div id="personasContainer"></div>
-
-            <!-- Política de Privacidad -->
-            <div class="bg-gray-50 px-8 pt-6 pb-4">
-                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
-                    <label class="flex items-start cursor-pointer">
-                        <input type="checkbox" 
-                               name="acepta_privacidad" 
-                               id="acepta_privacidad"
-                               required 
-                               class="mt-1 mr-3 w-5 h-5 cursor-pointer flex-shrink-0">
-                        <span class="text-sm text-gray-700">
-                            <i class="fas fa-shield-alt text-blue-600 mr-1"></i>
-                            He leído y acepto la 
-                            <a href="#" onclick="mostrarPrivacidad(); return false;" class="text-indigo-600 underline font-semibold hover:text-indigo-800">
-                                Política de Privacidad y Protección de Datos
-                            </a>. 
-                            Entiendo que mis datos serán tratados conforme al RGPD y comunicados al Ministerio del Interior según obliga la ley.
-                            <span class="text-red-500 font-bold">*</span>
-                        </span>
-                    </label>
+            <!-- Botón enviar final -->
+            <div id="seccionEnviarFinal" class="hidden mt-6">
+                <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-4 rounded-r-lg">
+                    <p class="text-green-800 font-semibold">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        ¡Todos han completado sus datos!
+                    </p>
                 </div>
-            </div>
-
-            <!-- Botón enviar -->
-            <div class="bg-gray-50 px-8 pb-8">
-                <button type="submit" 
-                        id="submitBtn"
+                <button onclick="enviarCheckinFinal()"
                         class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-4 px-8 rounded-xl font-bold text-lg hover:from-indigo-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-xl flex items-center justify-center gap-3">
-                    <i class="fas fa-check-circle text-2xl"></i>
-                    <span>Completar Check-in</span>
+                    <i class="fas fa-paper-plane text-2xl"></i>
+                    <span>Enviar Check-in Completo</span>
                 </button>
-                
-                <div id="mensaje" class="hidden mt-6 p-4 rounded-lg text-center font-semibold"></div>
             </div>
-
-        </form>
+        </div>
 
         <!-- Footer -->
         <div class="mt-8 text-center text-gray-600">
             <div class="bg-white rounded-lg shadow-lg p-6">
-                <i class="fas fa-lock text-3xl text-green-500 mb-3"></i>
-                <p class="font-semibold">🔒 Tus datos están protegidos</p>
-                <p class="text-sm mt-2">Solo se usan para cumplir con la normativa legal de hospedajes</p>
+                <i class="fas fa-cloud text-3xl text-green-500 mb-3"></i>
+                <p class="font-semibold">☁️ Datos guardados en la nube</p>
+                <p class="text-sm mt-2">Cada persona puede rellenar desde su propio dispositivo</p>
             </div>
         </div>
     </div>
 
     <script>
-        const form = document.getElementById('checkinForm');
-        const submitBtn = document.getElementById('submitBtn');
-        const mensaje = document.getElementById('mensaje');
-        const numeroPersonasSelect = document.getElementById('numero_personas');
-        const personasContainer = document.getElementById('personasContainer');
-        const fechaEntrada = document.getElementById('fecha_entrada');
-        const fechaSalida = document.getElementById('fecha_salida');
+        // =============================================
+        // CONFIGURACIÓN
+        // =============================================
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwiIrue7uA8aD8bUUAorgiNv1JPJS92LuhsNFnI9X6QMRClqw-_088-EIFZlKwtqxpC/exec';
         
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzd7mMAPqGDtZJ3ESb3jkq1KoOMi2C6ur7DWJ1HBp4aTH5RZ9iSQTNvirpdkp32oMmBpQ/exec';
-        
-        fechaEntrada.addEventListener('change', () => {
-            fechaSalida.min = fechaEntrada.value;
-        });
+        let reservaActual = null;
+        let personaSeleccionada = null;
+        let personasCompletadas = [];
 
-        numeroPersonasSelect.addEventListener('change', (e) => {
-            const numPersonas = parseInt(e.target.value);
-            personasContainer.innerHTML = '';
+        // =============================================
+        // INICIALIZACIÓN
+        // =============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            var params = new URLSearchParams(window.location.search);
+            var codigo = params.get('reserva');
             
-            if (numPersonas > 0) {
-                for (let i = 1; i <= numPersonas; i++) {
-                    personasContainer.innerHTML += generarFormularioPersona(i);
-                }
-                for (let i = 1; i <= numPersonas; i++) {
-                    activarListenersPersona(i);
-                }
-            }
-        });
-
-        function generarFormularioPersona(num) {
-            const colores = [
-                'from-indigo-500 to-purple-500',
-                'from-purple-500 to-pink-500',
-                'from-pink-500 to-red-500',
-                'from-red-500 to-orange-500',
-                'from-orange-500 to-yellow-500',
-                'from-yellow-500 to-green-500',
-                'from-green-500 to-teal-500',
-                'from-teal-500 to-cyan-500',
-                'from-cyan-500 to-blue-500',
-                'from-blue-500 to-indigo-500'
-            ];
-            const color = colores[(num - 1) % colores.length];
-            
-            return `
-            <div class="bg-gradient-to-r ${color} p-6">
-                <h2 class="text-2xl font-bold text-white flex items-center">
-                    <i class="fas fa-user mr-3"></i>
-                    Persona ${num} ${num === 1 ? '(Titular de la reserva)' : ''}
-                </h2>
-            </div>
-            
-            <div class="p-8 space-y-6 border-b-4 border-gray-200">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">
-                            Nombre <span class="text-red-500">*</span>
-                        </label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-3 text-gray-400">
-                                <i class="fas fa-user"></i>
-                            </span>
-                            <input type="text" 
-                                   name="persona_${num}_nombre" 
-                                   required 
-                                   placeholder="Ej: Juan"
-                                   class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">
-                            Primer Apellido <span class="text-red-500">*</span>
-                        </label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-3 text-gray-400">
-                                <i class="fas fa-user-tag"></i>
-                            </span>
-                            <input type="text" 
-                                   name="persona_${num}_apellido1" 
-                                   required 
-                                   placeholder="Ej: García"
-                                   class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">
-                            Segundo Apellido <span class="text-red-500">*</span>
-                        </label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-3 text-gray-400">
-                                <i class="fas fa-user-tag"></i>
-                            </span>
-                            <input type="text" 
-                                   name="persona_${num}_apellido2" 
-                                   required 
-                                   placeholder="Ej: López"
-                                   class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">
-                            Viajo en el grupo con <span class="text-red-500">*</span>
-                        </label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-3 text-gray-400">
-                                <i class="fas fa-people-arrows"></i>
-                            </span>
-                            <select name="persona_${num}_parentesco" 
-                                    required
-                                    class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition appearance-none">
-                                <option value="">Selecciona...</option>
-                                <option value="Cónyuge">Mi cónyuge</option>
-                                <option value="Pareja">Mi pareja</option>
-                                <option value="Hijo/a">Mi hijo/a</option>
-                                <option value="Padre/Madre">Mi padre/madre</option>
-                                <option value="Hermano/a">Mi hermano/a</option>
-                                <option value="Familia">Familia</option>
-                                <option value="Amigos">Amigos</option>
-                                <option value="Solo/a">Viajo solo/a</option>
-                                <option value="Otro">Otro</option>
-                            </select>
-                        </div>
-                        <p class="text-xs text-gray-500 mt-1">
-                            <i class="fas fa-info-circle"></i> 
-                            Indica en general con quién viajas
-                        </p>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">
-                            Tipo de Documento <span class="text-red-500">*</span>
-                        </label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-3 text-gray-400">
-                                <i class="fas fa-passport"></i>
-                            </span>
-                            <select name="persona_${num}_tipo_documento" 
-                                    id="persona_${num}_tipo_documento"
-                                    required
-                                    class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition appearance-none">
-                                <option value="">Selecciona...</option>
-                                <option value="DNI">DNI</option>
-                                <option value="NIE">NIE</option>
-                                <option value="Pasaporte">Pasaporte</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">
-                            Número de Documento <span class="text-red-500">*</span>
-                        </label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-3 text-gray-400">
-                                <i class="fas fa-hashtag"></i>
-                            </span>
-                            <input type="text" 
-                                   name="persona_${num}_numero_documento" 
-                                   required 
-                                   placeholder="Ej: 12345678A"
-                                   class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
-                        </div>
-                    </div>
-
-                    <div id="persona_${num}_soporte_container" class="hidden md:col-span-2">
-                        <label class="block text-sm font-bold text-gray-700 mb-2">
-                            Número de Soporte <span class="text-red-500">*</span>
-                        </label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-3 text-gray-400">
-                                <i class="fas fa-barcode"></i>
-                            </span>
-                            <input type="text" 
-                                   name="persona_${num}_numero_soporte" 
-                                   id="persona_${num}_numero_soporte"
-                                   placeholder="Ej: ABC123456"
-                                   pattern="[A-Z]{3}[0-9]{6}"
-                                   title="Formato: 3 letras mayúsculas + 6 números"
-                                   class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
-                        </div>
-                        <p class="text-xs text-gray-500 mt-1">
-                            <i class="fas fa-info-circle"></i> 
-                            Lo encuentras en la parte superior derecha del DNI
-                        </p>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">
-                            Nacionalidad <span class="text-red-500">*</span>
-                        </label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-3 text-gray-400">
-                                <i class="fas fa-globe"></i>
-                            </span>
-                            <input type="text" 
-                                   name="persona_${num}_nacionalidad" 
-                                   required 
-                                   placeholder="Ej: España"
-                                   class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">
-                            Fecha de Nacimiento <span class="text-red-500">*</span>
-                        </label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-3 text-gray-400">
-                                <i class="fas fa-calendar"></i>
-                            </span>
-                            <input type="date" 
-                                   name="persona_${num}_fecha_nacimiento" 
-                                   required
-                                   class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">
-                            Sexo <span class="text-red-500">*</span>
-                        </label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-3 text-gray-400">
-                                <i class="fas fa-venus-mars"></i>
-                            </span>
-                            <select name="persona_${num}_sexo" 
-                                    required
-                                    class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition appearance-none">
-                                <option value="">Selecciona...</option>
-                                <option value="M">Masculino</option>
-                                <option value="F">Femenino</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">
-                            Teléfono <span class="text-red-500">*</span>
-                        </label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-3 text-gray-400">
-                                <i class="fas fa-phone"></i>
-                            </span>
-                            <input type="tel" 
-                                   name="persona_${num}_telefono" 
-                                   required 
-                                   placeholder="Ej: +34 600 123 456"
-                                   pattern="[+]?[0-9\\s]+"
-                                   class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">
-                            Email <span class="text-red-500">*</span>
-                        </label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-3 text-gray-400">
-                                <i class="fas fa-envelope"></i>
-                            </span>
-                            <input type="email" 
-                                   name="persona_${num}_email" 
-                                   required 
-                                   placeholder="Ej: tu@email.com"
-                                   class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-gray-50 p-4 rounded-lg">
-                    <h3 class="font-bold text-gray-700 mb-4 flex items-center">
-                        <i class="fas fa-map-marked-alt mr-2"></i>
-                        Dirección del Domicilio
-                    </h3>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-bold text-gray-700 mb-2">
-                                Calle/Avenida <span class="text-red-500">*</span>
-                            </label>
-                            <input type="text" 
-                                   name="persona_${num}_calle" 
-                                   required 
-                                   placeholder="Ej: Calle Mayor"
-                                   class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-2">
-                                Número/Puerta <span class="text-red-500">*</span>
-                            </label>
-                            <input type="text" 
-                                   name="persona_${num}_numero_puerta" 
-                                   required 
-                                   placeholder="Ej: 24, 3, 5B"
-                                   class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-2">
-                                Piso (opcional)
-                            </label>
-                            <input type="text" 
-                                   name="persona_${num}_piso" 
-                                   placeholder="Ej: 2º, Bajo, Ático"
-                                   class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-2">
-                                Código Postal <span class="text-red-500">*</span>
-                            </label>
-                            <input type="text" 
-                                   name="persona_${num}_codigo_postal" 
-                                   required 
-                                   placeholder="Ej: 08001"
-                                   pattern="[0-9]{4,10}"
-                                   class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-2">
-                                Ciudad <span class="text-red-500">*</span>
-                            </label>
-                            <input type="text" 
-                                   name="persona_${num}_ciudad" 
-                                   required 
-                                   placeholder="Ej: Barcelona"
-                                   class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-2">
-                                Provincia <span class="text-red-500">*</span>
-                            </label>
-                            <input type="text" 
-                                   name="persona_${num}_provincia" 
-                                   required 
-                                   placeholder="Ej: Barcelona"
-                                   class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-2">
-                                País <span class="text-red-500">*</span>
-                            </label>
-                            <input type="text" 
-                                   name="persona_${num}_pais" 
-                                   required 
-                                   placeholder="Ej: España"
-                                   class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
-                        </div>
-                    </div>
-                </div>
-            </div>
-            `;
-        }
-
-        function activarListenersPersona(num) {
-            const tipoDoc = document.getElementById(`persona_${num}_tipo_documento`);
-            const soporteContainer = document.getElementById(`persona_${num}_soporte_container`);
-            const numeroSoporte = document.getElementById(`persona_${num}_numero_soporte`);
-            
-            if (tipoDoc) {
-                tipoDoc.addEventListener('change', (e) => {
-                    if (e.target.value === 'DNI' || e.target.value === 'NIE') {
-                        soporteContainer.classList.remove('hidden');
-                        numeroSoporte.required = true;
-                    } else {
-                        soporteContainer.classList.add('hidden');
-                        numeroSoporte.required = false;
-                        numeroSoporte.value = '';
-                    }
-                });
+            if (codigo) {
+                cargarReserva(codigo);
             }
 
-            if (numeroSoporte) {
-                numeroSoporte.addEventListener('input', (e) => {
-                    e.target.value = e.target.value.toUpperCase();
-                });
-            }
-        }
-
-        function mostrarPrivacidad() {
-            const ventana = window.open('', 'Política de Privacidad', 'width=700,height=800,scrollbars=yes');
-            ventana.document.write(`
-                <!DOCTYPE html>
-                <html lang="es">
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Política de Privacidad - Barranc de la Serra</title>
-                    <style>
-                        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; padding: 30px; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; background: #f9fafb; }
-                        .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-                        h1 { color: #4F46E5; border-bottom: 3px solid #4F46E5; padding-bottom: 10px; margin-bottom: 20px; }
-                        h2 { color: #6366F1; margin-top: 25px; margin-bottom: 15px; }
-                        ul { margin-left: 20px; margin-bottom: 15px; }
-                        li { margin-bottom: 8px; }
-                        .info-box { background: #EEF2FF; border-left: 4px solid #4F46E5; padding: 15px; margin: 15px 0; border-radius: 5px; }
-                        .button { background: #4F46E5; color: white; padding: 12px 30px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; display: block; margin: 30px auto 0; }
-                        .button:hover { background: #4338CA; }
-                        strong { color: #4F46E5; }
-                    </style>
-                </head>
-                <body>
-                    <div class="container">
-                        <h1>📜 POLÍTICA DE PRIVACIDAD Y PROTECCIÓN DE DATOS</h1>
-                        <h2>1. RESPONSABLE DEL TRATAMIENTO</h2>
-                        <div class="info-box">
-                            <p><strong>Titular:</strong> Albergue Barranc de la Serra</p>
-                            <p><strong>Dirección:</strong> Carretera Calaceite - Monroyo, nº 3</p>
-                            <p><strong>Email:</strong> info@barrancdelaserra.com</p>
-                            <p><strong>Teléfono:</strong> 686 641 920</p>
-                        </div>
-                        <h2>2. FINALIDAD DEL TRATAMIENTO</h2>
-                        <ul>
-                            <li>✅ <strong>Cumplir con la obligación legal</strong> del Parte de Viajeros (Real Decreto 933/2021)</li>
-                            <li>✅ <strong>Gestión de tu reserva</strong> y estancia</li>
-                            <li>✅ <strong>Comunicaciones relacionadas</strong> con tu reserva</li>
-                        </ul>
-                        <h2>3. LEGITIMACIÓN</h2>
-                        <p>Obligación legal (Parte de Viajeros) y ejecución del contrato de alojamiento.</p>
-                        <h2>4. DESTINATARIOS</h2>
-                        <ul>
-                            <li>Ministerio del Interior (obligación legal)</li>
-                            <li>Google LLC (almacenamiento seguro)</li>
-                        </ul>
-                        <div class="info-box"><strong>⚠️ No vendemos tus datos a terceros.</strong></div>
-                        <h2>5. TUS DERECHOS</h2>
-                        <p>Acceso, rectificación, supresión, limitación, portabilidad y oposición:</p>
-                        <div class="info-box">
-                            <p><strong>Email:</strong> info@barrancdelaserra.com<br>
-                            <strong>Teléfono:</strong> 686 641 920</p>
-                        </div>
-                        <p><strong>Reclamaciones:</strong> Agencia Española de Protección de Datos (www.aepd.es)</p>
-                        <hr style="margin: 30px 0; border: none; border-top: 2px solid #E5E7EB;">
-                        <p style="text-align: center; color: #6B7280; font-size: 14px;">
-                            <strong>Fecha última actualización:</strong> Febrero 2026<br>Barranc de la Serra
-                        </p>
-                        <button onclick="window.close()" class="button">✓ Cerrar ventana</button>
-                    </div>
-                </body>
-                </html>
-            `);
-        }
-        
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin text-2xl"></i> <span>Enviando...</span>';
-            
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData);
-            
-            try {
-                const response = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify(data)
-                });
-                
-                const result = await response.json();
-                
-                if (result.status === 'success') {
-                    mensaje.className = 'mt-6 p-6 rounded-lg text-center font-semibold bg-green-100 border-2 border-green-500 text-green-800';
-                    mensaje.innerHTML = '<i class="fas fa-check-circle text-3xl mb-2"></i><br>¡Check-in completado con éxito!<br><span class="text-sm">Nos vemos pronto en Barranc de la Serra 😊</span>';
-                    mensaje.classList.remove('hidden');
-                    form.reset();
-                    personasContainer.innerHTML = '';
-                    mensaje.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            document.getElementById('p_tipo_documento').addEventListener('change', function(e) {
+                var sc = document.getElementById('soporteContainer');
+                if (e.target.value === 'DNI' || e.target.value === 'NIE') {
+                    sc.classList.remove('hidden');
                 } else {
-                    throw new Error(result.mensaje);
+                    sc.classList.add('hidden');
+                    document.getElementById('p_numero_soporte').value = '';
+                }
+            });
+
+            document.getElementById('p_numero_soporte').addEventListener('input', function(e) {
+                e.target.value = e.target.value.toUpperCase();
+            });
+
+            document.getElementById('crear_fecha_entrada').addEventListener('change', function(e) {
+                document.getElementById('crear_fecha_salida').min = e.target.value;
+            });
+        });
+
+        // =============================================
+        // UTILIDADES
+        // =============================================
+        function mostrarLoading(texto) {
+            document.getElementById('loadingText').textContent = texto || 'Cargando...';
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+        }
+
+        function ocultarLoading() {
+            document.getElementById('loadingOverlay').classList.add('hidden');
+        }
+
+        function mostrarToast(texto, tipo) {
+            var toast = document.getElementById('toast');
+            toast.textContent = texto;
+            toast.className = 'toast ' + (tipo || 'success') + ' visible';
+            setTimeout(function() { toast.classList.remove('visible'); }, 3000);
+        }
+
+        function llamarAPI(datos) {
+            return fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify(datos)
+            })
+            .then(function(response) {
+                return response.json();
+            });
+        }
+
+        // =============================================
+        // CREAR RESERVA
+        // =============================================
+        function crearReserva() {
+            var numPersonas = document.getElementById('crear_numero_personas').value;
+            var origen = document.getElementById('crear_origen_reserva').value;
+            var entrada = document.getElementById('crear_fecha_entrada').value;
+            var salida = document.getElementById('crear_fecha_salida').value;
+
+            if (!numPersonas || !origen || !entrada || !salida) {
+                mostrarToast('Completa todos los campos', 'error');
+                return;
+            }
+
+            mostrarLoading('Creando reserva...');
+
+            llamarAPI({
+                accion: 'crear_reserva',
+                numero_personas: numPersonas,
+                origen_reserva: origen,
+                fecha_entrada: entrada,
+                fecha_salida: salida
+            })
+            .then(function(result) {
+                ocultarLoading();
+                if (result.status === 'success') {
+                    var codigo = result.codigo;
+                    var enlace = window.location.origin + window.location.pathname + '?reserva=' + codigo;
+                    
+                    document.getElementById('codigoReservaDisplay').textContent = codigo;
+                    document.getElementById('enlaceCompartir').value = enlace;
+                    
+                    document.getElementById('vistaCrearReserva').classList.add('hidden');
+                    document.getElementById('vistaCompartir').classList.remove('hidden');
+                    
+                    reservaActual = {
+                        codigo: codigo,
+                        numero_personas: parseInt(numPersonas),
+                        fecha_entrada: entrada,
+                        fecha_salida: salida
+                    };
+
+                    mostrarToast('¡Reserva creada con éxito!');
+                } else {
+                    mostrarToast('Error: ' + result.mensaje, 'error');
+                }
+            })
+            .catch(function(error) {
+                ocultarLoading();
+                mostrarToast('Error de conexión: ' + error.message, 'error');
+                console.error('Error completo:', error);
+            });
+        }
+
+        // =============================================
+        // COMPARTIR
+        // =============================================
+        function copiarEnlace() {
+            var input = document.getElementById('enlaceCompartir');
+            navigator.clipboard.writeText(input.value);
+            mostrarToast('¡Enlace copiado!');
+        }
+
+        function compartirWhatsApp() {
+            var enlace = document.getElementById('enlaceCompartir').value;
+            var texto = '🏡 Check-in Barranc de la Serra\n\nPor favor, rellena tus datos:\n' + enlace;
+            window.open('https://wa.me/?text=' + encodeURIComponent(texto));
+        }
+
+        function compartirEmail() {
+            var enlace = document.getElementById('enlaceCompartir').value;
+            var asunto = 'Check-in Barranc de la Serra';
+            var cuerpo = 'Hola,\n\nRellena tus datos para el check-in:\n' + enlace + '\n\n¡Gracias!';
+            window.open('mailto:?subject=' + encodeURIComponent(asunto) + '&body=' + encodeURIComponent(cuerpo));
+        }
+
+        function compartirTelegram() {
+            var enlace = document.getElementById('enlaceCompartir').value;
+            window.open('https://t.me/share/url?url=' + encodeURIComponent(enlace) + '&text=' + encodeURIComponent('🏡 Check-in Barranc de la Serra'));
+        }
+
+        function irARellenar() {
+            window.location.href = window.location.pathname + '?reserva=' + reservaActual.codigo;
+        }
+
+        // =============================================
+        // CARGAR RESERVA
+        // =============================================
+        function cargarReserva(codigo) {
+            mostrarLoading('Cargando reserva...');
+
+            fetch(SCRIPT_URL + '?accion=obtener_reserva&codigo=' + codigo)
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(result) {
+                ocultarLoading();
+                if (result.status === 'success') {
+                    reservaActual = result;
+                    personasCompletadas = result.personas || [];
+
+                    document.getElementById('vistaCrearReserva').classList.add('hidden');
+                    document.getElementById('vistaRellenar').classList.remove('hidden');
+
+                    document.getElementById('infoCodigoReserva').textContent = result.codigo;
+                    document.getElementById('infoFechaEntrada').textContent = result.fecha_entrada;
+                    document.getElementById('infoFechaSalida').textContent = result.fecha_salida;
+                    document.getElementById('infoNumPersonas').textContent = result.numero_personas;
+
+                    renderizarSelectorPersonas();
+                    actualizarProgreso();
+                } else {
+                    mostrarToast('Reserva no encontrada', 'error');
+                    document.getElementById('vistaCrearReserva').classList.remove('hidden');
+                }
+            })
+            .catch(function(error) {
+                ocultarLoading();
+                mostrarToast('Error al cargar: ' + error.message, 'error');
+                document.getElementById('vistaCrearReserva').classList.remove('hidden');
+                console.error('Error completo:', error);
+            });
+        }
+
+        // =============================================
+        // SELECTOR DE PERSONAS
+        // =============================================
+        function renderizarSelectorPersonas() {
+            var container = document.getElementById('selectorPersonas');
+            var numPersonas = parseInt(reservaActual.numero_personas);
+            var html = '';
+
+            for (var i = 1; i <= numPersonas; i++) {
+                var completada = buscarPersonaCompletada(i);
+                var nombre = completada ? completada.nombre : '';
+                
+                if (completada) {
+                    html += '<button onclick="seleccionarPersona(' + i + ')" ' +
+                        'class="p-4 rounded-xl border-2 transition text-center hover:shadow-lg border-green-500 bg-green-50 text-green-800">' +
+                        '<i class="fas fa-check-circle text-green-500 text-3xl mb-2"></i>' +
+                        '<p class="font-bold">Persona ' + i + '</p>' +
+                        '<p class="text-xs text-green-600 mt-1">✅ ' + nombre + '</p>' +
+                        '</button>';
+                } else {
+                    html += '<button onclick="seleccionarPersona(' + i + ')" ' +
+                        'class="p-4 rounded-xl border-2 transition text-center hover:shadow-lg border-gray-300 bg-white text-gray-700 hover:border-indigo-500">' +
+                        '<i class="fas fa-user-circle text-gray-400 text-3xl mb-2"></i>' +
+                        '<p class="font-bold">Persona ' + i + '</p>' +
+                        '<p class="text-xs text-gray-500 mt-1">Pendiente</p>' +
+                        '</button>';
+                }
+            }
+
+            container.innerHTML = html;
+        }
+
+        function buscarPersonaCompletada(num) {
+            for (var i = 0; i < personasCompletadas.length; i++) {
+                if (parseInt(personasCompletadas[i].num_persona) === num) {
+                    return personasCompletadas[i];
+                }
+            }
+            return null;
+        }
+
+        function actualizarProgreso() {
+            var total = parseInt(reservaActual.numero_personas);
+            var completados = personasCompletadas.length;
+            var porcentaje = total > 0 ? (completados / total) * 100 : 0;
+
+            document.getElementById('progressFill').style.width = porcentaje + '%';
+            document.getElementById('progressText').textContent = completados + ' de ' + total + ' completados';
+
+            if (completados === total && total > 0) {
+                document.getElementById('seccionEnviarFinal').classList.remove('hidden');
+            } else {
+                document.getElementById('seccionEnviarFinal').classList.add('hidden');
+            }
+        }
+
+        // =============================================
+        // SELECCIONAR PERSONA
+        // =============================================
+        function seleccionarPersona(num) {
+            personaSeleccionada = num;
+            document.getElementById('formularioPersona').classList.remove('hidden');
+            document.getElementById('tituloPersona').textContent = 
+                'Persona ' + num + (num === 1 ? ' (Titular)' : '');
+
+            // Limpiar campos
+            var campos = ['nombre','apellido1','apellido2','parentesco','tipo_documento',
+                          'numero_documento','numero_soporte','nacionalidad','fecha_nacimiento',
+                          'sexo','telefono','email','calle','numero_puerta','piso',
+                          'codigo_postal','ciudad','provincia','pais'];
+            
+            for (var c = 0; c < campos.length; c++) {
+                var el = document.getElementById('p_' + campos[c]);
+                if (el) el.value = '';
+            }
+            document.getElementById('p_privacidad').checked = false;
+            document.getElementById('soporteContainer').classList.add('hidden');
+
+            // Cargar datos existentes
+            var existente = buscarPersonaCompletada(num);
+            if (existente) {
+                var mapeo = {
+                    nombre: 'nombre', apellido1: 'apellido1', apellido2: 'apellido2',
+                    parentesco: 'parentesco', tipo_documento: 'tipo_documento',
+                    numero_documento: 'numero_documento', numero_soporte: 'numero_soporte',
+                    nacionalidad: 'nacionalidad', fecha_nacimiento: 'fecha_nacimiento',
+                    sexo: 'sexo', telefono: 'telefono', email: 'email',
+                    calle: 'calle', numero_puerta: 'numero_puerta', piso: 'piso',
+                    codigo_postal: 'codigo_postal', ciudad: 'ciudad',
+                    provincia: 'provincia', pais: 'pais'
+                };
+
+                var keys = Object.keys(mapeo);
+                for (var k = 0; k < keys.length; k++) {
+                    var campo = keys[k];
+                    var key = mapeo[campo];
+                    var el = document.getElementById('p_' + campo);
+                    if (el && existente[key]) {
+                        el.value = existente[key];
+                    }
                 }
                 
-            } catch (error) {
-                mensaje.className = 'mt-6 p-6 rounded-lg text-center font-semibold bg-red-100 border-2 border-red-500 text-red-800';
-                mensaje.innerHTML = '<i class="fas fa-exclamation-triangle text-3xl mb-2"></i><br>Error al enviar<br><span class="text-sm">Por favor, inténtalo de nuevo</span>';
-                mensaje.classList.remove('hidden');
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fas fa-check-circle text-2xl"></i> <span>Completar Check-in</span>';
+                if (existente.tipo_documento === 'DNI' || existente.tipo_documento === 'NIE') {
+                    document.getElementById('soporteContainer').classList.remove('hidden');
+                }
+                document.getElementById('p_privacidad').checked = true;
             }
-        });
-    </script>
 
+            document.getElementById('formularioPersona').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // =============================================
+        // GUARDAR PERSONA ONLINE
+        // =============================================
+        function guardarPersonaOnline() {
+            var camposRequeridos = ['nombre','apellido1','apellido2','parentesco',
+                'tipo_documento','numero_documento','nacionalidad','fecha_nacimiento',
+                'sexo','telefono','email','calle','numero_puerta','codigo_postal',
+                'ciudad','provincia','pais'];
+
+            var faltantes = [];
+            for (var i = 0; i < camposRequeridos.length; i++) {
+                var c = camposRequeridos[i];
+                var el = document.getElementById('p_' + c);
+                if (!el.value.trim()) {
+                    faltantes.push(c);
+                    el.classList.add('border-red-500');
+                    (function(element) {
+                        var handler = function() {
+                            element.classList.remove('border-red-500');
+                            element.removeEventListener('input', handler);
+                            element.removeEventListener('change', handler);
+                        };
+                        element.addEventListener('input', handler);
+                        element.addEventListener('change', handler);
+                    })(el);
+                }
+            }
+
+            var tipoDoc = document.getElementById('p_tipo_documento').value;
+            if ((tipoDoc === 'DNI' || tipoDoc === 'NIE') && !document.getElementById('p_numero_soporte').value.trim()) {
+                faltantes.push('numero_soporte');
+                document.getElementById('p_numero_soporte').classList.add('border-red-500');
+            }
+
+            if (!document.getElementById('p_privacidad').checked) {
+                mostrarToast('Debes aceptar la política de privacidad', 'error');
+                return;
+            }
+
+            if (faltantes.length > 0) {
+                mostrarToast('Faltan ' + faltantes.length + ' campo(s) obligatorios', 'error');
+                return;
+            }
+
+            mostrarLoading('Guardando datos en la nube...');
+
+            var datos = {
+                accion: 'guardar_persona',
+                codigo_reserva: reservaActual.codigo,
+                num_persona: personaSeleccionada,
+                nombre: document.getElementById('p_nombre').value,
+                apellido1: document.getElementById('p_apellido1').value,
+                apellido2: document.getElementById('p_apellido2').value,
+                parentesco: document.getElementById('p_parentesco').value,
+                tipo_documento: document.getElementById('p_tipo_documento').value,
+                numero_documento: document.getElementById('p_numero_documento').value,
+                numero_soporte: document.getElementById('p_numero_soporte').value,
+                nacionalidad: document.getElementById('p_nacionalidad').value,
+                fecha_nacimiento: document.getElementById('p_fecha_nacimiento').value,
+                sexo: document.getElementById('p_sexo').value,
+                telefono: document.getElementById('p_telefono').value,
+                email: document.getElementById('p_email').value,
+                calle: document.getElementById('p_calle').value,
+                numero_puerta: document.getElementById('p_numero_puerta').value,
+                piso: document.getElementById('p_piso').value,
+                codigo_postal: document.getElementById('p_codigo_postal').value,
+                ciudad: document.getElementById('p_ciudad').value,
+                provincia: document.getElementById('p_provincia').value,
+                pais: document.getElementById('p_pais').value
+            };
+
+            llamarAPI(datos)
+            .then(function(result) {
+                ocultarLoading();
+                if (result.status === 'success') {
+                    mostrarToast('¡Datos guardados en la nube! ☁️');
+                    
+                    // Actualizar lista local
+                    var idx = -1;
+                    for (var i = 0; i < personasCompletadas.length; i++) {
+                        if (parseInt(personasCompletadas[i].num_persona) === personaSeleccionada) {
+                            idx = i;
+                            break;
+                        }
+                    }
+                    
+                    if (idx >= 0) {
+                        personasCompletadas[idx] = datos;
+                    } else {
+                        personasCompletadas.push(datos);
+                    }
+
+                    document.getElementById('formularioPersona').classList.add('hidden');
+                    renderizarSelectorPersonas();
+                    actualizarProgreso();
+                    
+                    document.getElementById('selectorPersonas').scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    mostrarToast('Error: ' + result.mensaje, 'error');
+                }
+            })
+            .catch(function(error) {
+                ocultarLoading();
+                mostrarToast('Error de conexión: ' + error.message, 'error');
+                console.error('Error completo:', error);
+            });
+        }
+
+        // =============================================
+        // REFRESCAR
+        // =============================================
+        function refrescarEstado() {
+            cargarReserva(reservaActual.codigo);
+            mostrarToast('Actualizando...', 'info');
+        }
+
+        // =============================================
+        // ENVIAR CHECK-IN FINAL
+        // =============================================
+        function enviarCheckinFinal() {
+            mostrarLoading('Enviando check-in...');
+
+            llamarAPI({
+                accion: 'enviar_checkin',
+                codigo_reserva: reservaActual.codigo
+            })
+            .then(function(result) {
+                ocultarLoading();
+                if (result.status === 'success') {
+                    document.getElementById('vistaRellenar').innerHTML = 
+                        '<div class="bg-white rounded-2xl shadow-2xl p-12 text-center">' +
+                        '<i class="fas fa-check-circle text-green-500 text-7xl mb-6"></i>' +
+                        '<h2 class="text-3xl font-bold text-gray-800 mb-4">¡Check-in completado!</h2>' +
+                        '<p class="text-xl text-gray-600 mb-2">Nos vemos pronto en</p>' +
+                        '<p class="text-2xl font-bold text-indigo-600">Barranc de la Serra 🏡</p>' +
+                        '<p class="text-gray-500 mt-4">Código: ' + reservaActual.codigo + '</p>' +
+                        '</div>';
+                    mostrarToast('¡Check-in enviado con éxito!');
+                } else {
+                    mostrarToast('Error: ' + result.mensaje, 'error');
+                }
+            })
+            .catch(function(error) {
+                ocultarLoading();
+                mostrarToast('Error: ' + error.message, 'error');
+            });
+        }
+
+        // =============================================
+        // PRIVACIDAD
+        // =============================================
+        function mostrarPrivacidad() {
+            var v = window.open('', 'Privacidad', 'width=700,height=800,scrollbars=yes');
+            v.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Privacidad</title>' +
+                '<style>body{font-family:sans-serif;padding:30px;line-height:1.6;max-width:800px;margin:0 auto}' +
+                'h1{color:#4F46E5;border-bottom:3px solid #4F46E5;padding-bottom:10px}h2{color:#6366F1}' +
+                '.ib{background:#EEF2FF;border-left:4px solid #4F46E5;padding:15px;margin:15px 0;border-radius:5px}' +
+                '.btn{background:#4F46E5;color:white;padding:12px 30px;border:none;border-radius:8px;cursor:pointer;font-size:16px;font-weight:bold;display:block;margin:30px auto}' +
+                '</style></head><body>' +
+                '<h1>📜 POLÍTICA DE PRIVACIDAD</h1>' +
+                '<h2>1. RESPONSABLE</h2>' +
+                '<div class="ib"><p><strong>Titular:</strong> Albergue Barranc de la Serra</p>' +
+                '<p><strong>Dirección:</strong> Carretera Calaceite - Monroyo, nº 3</p>' +
+                '<p><strong>Email:</strong> info@barrancdelaserra.com</p>' +
+                '<p><strong>Teléfono:</strong> 686 641 920</p></div>' +
+                '<h2>2. FINALIDAD</h2><ul><li>Parte de Viajeros (RD 933/2021)</li><li>Gestión de reserva</li></ul>' +
+                '<h2>3. DESTINATARIOS</h2><ul><li>Ministerio del Interior</li><li>Google LLC</li></ul>' +
+                '<div class="ib"><strong>⚠️ No vendemos tus datos.</strong></div>' +
+                '<h2>4. DERECHOS</h2><p>Acceso, rectificación, supresión: info@barrancdelaserra.com</p>' +
+                '<button onclick="window.close()" class="btn">✓ Cerrar</button></body></html>');
+        }
+    </script>
 </body>
 </html>
-
