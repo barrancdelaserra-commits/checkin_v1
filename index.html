@@ -72,7 +72,42 @@
                 </div>
                 
                 <div class="p-8 space-y-6">
+                    <!-- Nombre y Email del cliente -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">
+                                Nombre del cliente <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-3 text-gray-400"><i class="fas fa-user"></i></span>
+                                <input type="text" id="crear_nombre_cliente" required placeholder="Ej: Juan García"
+                                       class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">
+                                Email del cliente <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-3 text-gray-400"><i class="fas fa-envelope"></i></span>
+                                <input type="email" id="crear_email_cliente" required placeholder="Ej: cliente@email.com"
+                                       class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Teléfono y Nº personas -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">
+                                Teléfono del cliente <span class="text-gray-400 text-xs">(opcional - para WhatsApp)</span>
+                            </label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-3 text-gray-400"><i class="fab fa-whatsapp"></i></span>
+                                <input type="tel" id="crear_telefono_cliente" placeholder="Ej: 600123456"
+                                       class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+                            </div>
+                        </div>
                         <div>
                             <label class="block text-sm font-bold text-gray-700 mb-2">
                                 Número de Personas <span class="text-red-500">*</span>
@@ -112,6 +147,10 @@
                                 </select>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Método de pago -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block text-sm font-bold text-gray-700 mb-2">
                                 Método de pago <span class="text-red-500">*</span>
@@ -123,7 +162,7 @@
                                     <option value="">Selecciona...</option>
                                     <option value="Booking">Booking.com</option>
                                     <option value="Airbnb">Airbnb</option>
-				    <option value="Transferencia">Transferencia</option>
+                                    <option value="Transferencia">Transferencia</option>
                                     <option value="Directo">Efectivo/Tarjeta</option>
                                     <option value="Web">Web del albergue</option>
                                     <option value="Otro">Otro</option>
@@ -131,6 +170,8 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Fechas -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block text-sm font-bold text-gray-700 mb-2">
@@ -153,6 +194,7 @@
                             </div>
                         </div>
                     </div>
+
                     <button onclick="crearReserva()" 
                             class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-4 px-8 rounded-xl font-bold text-lg hover:from-indigo-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-xl flex items-center justify-center gap-3">
                         <i class="fas fa-plus-circle text-2xl"></i>
@@ -465,11 +507,11 @@
         // =============================================
         // CONFIGURACIÓN
         // =============================================
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwiIrue7uA8aD8bUUAorgiNv1JPJS92LuhsNFnI9X6QMRClqw-_088-EIFZlKwtqxpC/exec';
+        var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzKFHR4FRMluCI0sOGE-vhJI9Hdj_4Yoq6l28nIIwK-R5bGpNLfc0LCHT2M2oLiGE4H/exec';
         
-        let reservaActual = null;
-        let personaSeleccionada = null;
-        let personasCompletadas = [];
+        var reservaActual = null;
+        var personaSeleccionada = null;
+        var personasCompletadas = [];
 
         // =============================================
         // INICIALIZACIÓN
@@ -534,20 +576,26 @@
         // CREAR RESERVA
         // =============================================
         function crearReserva() {
+            var nombreCliente = document.getElementById('crear_nombre_cliente').value;
+            var emailCliente = document.getElementById('crear_email_cliente').value;
+            var telefonoCliente = document.getElementById('crear_telefono_cliente').value;
             var numPersonas = document.getElementById('crear_numero_personas').value;
             var origen = document.getElementById('crear_origen_reserva').value;
             var entrada = document.getElementById('crear_fecha_entrada').value;
             var salida = document.getElementById('crear_fecha_salida').value;
 
-            if (!numPersonas || !origen || !entrada || !salida) {
-                mostrarToast('Completa todos los campos', 'error');
+            if (!nombreCliente || !emailCliente || !numPersonas || !origen || !entrada || !salida) {
+                mostrarToast('Completa todos los campos obligatorios', 'error');
                 return;
             }
 
-            mostrarLoading('Creando reserva...');
+            mostrarLoading('Creando reserva, enviando email y creando evento en calendario...');
 
             llamarAPI({
                 accion: 'crear_reserva',
+                nombre_cliente: nombreCliente,
+                email_cliente: emailCliente,
+                telefono_cliente: telefonoCliente,
                 numero_personas: numPersonas,
                 origen_reserva: origen,
                 fecha_entrada: entrada,
@@ -572,7 +620,31 @@
                         fecha_salida: salida
                     };
 
-                    mostrarToast('¡Reserva creada con éxito!');
+                    mostrarToast('¡Reserva creada! Email enviado y calendario actualizado ✅');
+
+                    // Abrir WhatsApp si hay teléfono
+                    if (telefonoCliente) {
+                        var telefono = telefonoCliente.replace(/\s+/g, '').replace(/^\+/, '');
+                        if (telefono.length <= 9) {
+                            telefono = '34' + telefono;
+                        }
+                        
+                        var mensajeWA = '🏡 *Albergue Barranc de la Serra*\n\n' +
+                            'Hola ' + nombreCliente + ',\n\n' +
+                            'Tu reserva ha sido confirmada ✅\n\n' +
+                            '📋 Código: *' + codigo + '*\n' +
+                            '🟢 Entrada: ' + entrada + '\n' +
+                            '🔴 Salida: ' + salida + '\n' +
+                            '👥 Personas: ' + numPersonas + '\n\n' +
+                            '⚠️ *Por favor, completa el check-in online lo antes posible:*\n' +
+                            enlace + '\n\n' +
+                            '📍 Ubicación:\nhttps://maps.app.goo.gl/4PW4Pqn9cU83GAsj6\n\n' +
+                            'Cualquier duda: 686 641 929 o info@barrancdelaserra.com\n\n' +
+                            '¡Nos vemos pronto! 😊';
+                        
+                        window.open('https://wa.me/' + telefono + '?text=' + encodeURIComponent(mensajeWA), '_blank');
+                    }
+
                 } else {
                     mostrarToast('Error: ' + result.mensaje, 'error');
                 }
@@ -717,9 +789,9 @@
             personaSeleccionada = num;
             document.getElementById('formularioPersona').classList.remove('hidden');
             document.getElementById('tituloPersona').textContent = 
-                'Persona ' + num + (num === 1 ? ' (Titular)' : '');
+                'Persona ' + num + (num === 1 ? ' (Encargado/a de la reserva)' : '');
 
-            // Limpiar campos
+
             var campos = ['nombre','apellido1','apellido2','parentesco','tipo_documento',
                           'numero_documento','numero_soporte','nacionalidad','fecha_nacimiento',
                           'sexo','telefono','email','calle','numero_puerta','piso',
@@ -732,7 +804,6 @@
             document.getElementById('p_privacidad').checked = false;
             document.getElementById('soporteContainer').classList.add('hidden');
 
-            // Cargar datos existentes
             var existente = buscarPersonaCompletada(num);
             if (existente) {
                 var mapeo = {
@@ -842,7 +913,6 @@
                 if (result.status === 'success') {
                     mostrarToast('¡Datos guardados en la nube! ☁️');
                     
-                    // Actualizar lista local
                     var idx = -1;
                     for (var i = 0; i < personasCompletadas.length; i++) {
                         if (parseInt(personasCompletadas[i].num_persona) === personaSeleccionada) {
@@ -927,9 +997,9 @@
                 '<h1>📜 POLÍTICA DE PRIVACIDAD</h1>' +
                 '<h2>1. RESPONSABLE</h2>' +
                 '<div class="ib"><p><strong>Titular:</strong> Albergue Barranc de la Serra</p>' +
-                '<p><strong>Dirección:</strong> Carretera Calaceite - Monroyo, nº 3</p>' +
+                '<p><strong>Dirección:</strong> Carretera Calaceite - Monroyo, nº 3, Fuentespalda, Teruel</p>' +
                 '<p><strong>Email:</strong> info@barrancdelaserra.com</p>' +
-                '<p><strong>Teléfono:</strong> 686 641 920</p></div>' +
+                '<p><strong>Teléfono:</strong> 686 641 929</p></div>' +
                 '<h2>2. FINALIDAD</h2><ul><li>Parte de Viajeros (RD 933/2021)</li><li>Gestión de reserva</li></ul>' +
                 '<h2>3. DESTINATARIOS</h2><ul><li>Ministerio del Interior</li><li>Google LLC</li></ul>' +
                 '<div class="ib"><strong>⚠️ No vendemos tus datos.</strong></div>' +
